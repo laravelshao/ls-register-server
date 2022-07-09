@@ -5,8 +5,6 @@ import com.cl.register.server.dto.HeartbeatResponse;
 import com.cl.register.server.dto.RegisterRequest;
 import com.cl.register.server.dto.RegisterResponse;
 
-import java.util.Map;
-
 /**
  * 负责接收客户端的服务注册及心跳上报
  * <p>
@@ -59,6 +57,22 @@ public class RegisterServerController {
     }
 
     /**
+     * 服务下线
+     */
+    public void cancel(String serviceName, String serviceInstanceId) {
+
+        // 从服务注册中摘除实例
+        registry.remove(serviceName, serviceInstanceId);
+
+        // 更新自我保护阈值
+        synchronized (SelfProtectionPolicy.class) {
+            SelfProtectionPolicy selfProtectionPolicy = SelfProtectionPolicy.getInstance();
+            selfProtectionPolicy.setExpectedHeartbeatRate(selfProtectionPolicy.getExpectedHeartbeatRate() + 2);
+            selfProtectionPolicy.setExpectedHeartbeatThreshold((long) (selfProtectionPolicy.getExpectedHeartbeatRate() * 0.85));
+        }
+    }
+
+    /**
      * 心跳操作
      *
      * @param heartbeatRequest 心跳请求
@@ -95,7 +109,12 @@ public class RegisterServerController {
      * @return
      */
     public Applications fetchFullRegistry() {
-        return new Applications(registry.getRegistry());
+        try {
+            registry.readLock();
+            return new Applications(registry.getRegistry());
+        } finally {
+            registry.readUnlock();
+        }
     }
 
     /**
@@ -104,22 +123,12 @@ public class RegisterServerController {
      * @return
      */
     public DeltaRegistry fetchDeltaRegistry() {
-        return registry.getDeltaRegistry();
-    }
-
-    /**
-     * 服务下线
-     */
-    public void cancel(String serviceName, String serviceInstanceId) {
-
-        // 从服务注册中摘除实例
-        registry.remove(serviceName, serviceInstanceId);
-
-        // 更新自我保护阈值
-        synchronized (SelfProtectionPolicy.class) {
-            SelfProtectionPolicy selfProtectionPolicy = SelfProtectionPolicy.getInstance();
-            selfProtectionPolicy.setExpectedHeartbeatRate(selfProtectionPolicy.getExpectedHeartbeatRate() + 2);
-            selfProtectionPolicy.setExpectedHeartbeatThreshold((long) (selfProtectionPolicy.getExpectedHeartbeatRate() * 0.85));
+        try {
+            registry.readLock();
+            return registry.getDeltaRegistry();
+        } finally {
+            registry.readUnlock();
         }
     }
+
 }

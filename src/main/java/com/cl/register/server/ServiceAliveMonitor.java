@@ -1,5 +1,7 @@
 package com.cl.register.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,23 +56,46 @@ public class ServiceAliveMonitor {
                     // 判断是否开启自我保护机制
                     SelfProtectionPolicy selfProtectionPolicy = SelfProtectionPolicy.getInstance();
                     if (selfProtectionPolicy.isEnable()) {
-                        Thread.sleep(1000L);
+                        Thread.sleep(CHECK_ALIVE_INTERVAL);
                         continue;
                     }
 
-                    // 获取注册表MAP
-                    registryMap = registry.getRegistry();
+                    // 定义要删除的服务实例的集合
+                    List<ServiceInstance> removingServiceInstances = new ArrayList<ServiceInstance>();
 
-                    for (String serviceName : registryMap.keySet()) {
+                    try {
+                        // 加读锁，读取注册表时可以同时读，但是不允许写
+                        registry.readLock();
 
-                        // 获取服务下服务实例列表
-                        Map<String, ServiceInstance> serviceInstanceMap = registryMap.get(serviceName);
+                        // 获取注册表MAP
+                        registryMap = registry.getRegistry();
+                        for (String serviceName : registryMap.keySet()) {
 
-                        for (ServiceInstance serviceInstance : serviceInstanceMap.values()) {
-                            // 判断是否存活，超过90秒无心跳认为已死亡，则从注册表移除
-                            if (!serviceInstance.isAlive()) {
-                                registry.remove(serviceName, serviceInstance.getServiceInstanceId());
+                            // 获取服务下服务实例列表
+                            Map<String, ServiceInstance> serviceInstanceMap = registryMap.get(serviceName);
+
+                            for (ServiceInstance serviceInstance : serviceInstanceMap.values()) {
+                                // 判断是否存活，超过90秒无心跳认为已死亡，则从注册表移除
+                                if (!serviceInstance.isAlive()) {
+                                    removingServiceInstances.add(serviceInstance);
+                                }
                             }
+                        }
+                    } finally {
+                        // 释放读锁
+                        registry.readUnlock();
+                    }
+
+                    // 将所有的要删除的服务实例，从服务注册表删除
+                    for (ServiceInstance serviceInstance : removingServiceInstances) {
+                        registry.remove(serviceInstance.getServiceName(), serviceInstance.getServiceInstanceId());
+
+                        // 更新自我保护机制的阈值
+                        synchronized (SelfProtectionPolicy.class) {
+                            selfProtectionPolicy.setExpectedHeartbeatRate(
+                                    selfProtectionPolicy.getExpectedHeartbeatRate() - 2);
+                            selfProtectionPolicy.setExpectedHeartbeatThreshold(
+                                    (long) (selfProtectionPolicy.getExpectedHeartbeatRate() * 0.85));
                         }
                     }
 
