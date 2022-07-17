@@ -1,8 +1,9 @@
 package com.cl.register.server;
 
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -41,7 +42,7 @@ public class ServiceRegistry {
     /**
      * 最近变更的服务实例的队列
      */
-    private LinkedList<RecentlyChangedServiceInstance> recentlyChangedQueue = new LinkedList<>();
+    private Queue<RecentlyChangedServiceInstance> recentlyChangedQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 读写锁
@@ -274,16 +275,20 @@ public class ServiceRegistry {
         public void run() {
             while (true) {
                 try {
-                    synchronized (instance) {
+                    try {
+                        writeLock();
+
                         RecentlyChangedServiceInstance recentlyChangedItem = null;
                         long currentTimestamp = System.currentTimeMillis();
 
                         while ((recentlyChangedItem = recentlyChangedQueue.peek()) != null) {
                             // 判断如果一个服务实例变更信息已经在队列里存在超过3分钟就从队列中移除
                             if (currentTimestamp - recentlyChangedItem.changedTimestamp > RECENTLY_CHANGED_ITEM_EXPIRED) {
-                                recentlyChangedQueue.pop();
+                                recentlyChangedQueue.poll();
                             }
                         }
+                    } finally {
+                        writeUnlock();
                     }
                     Thread.sleep(RECENTLY_CHANGED_ITEM_CHECK_INTERVAL);
                 } catch (Exception e) {
