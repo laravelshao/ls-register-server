@@ -1,8 +1,8 @@
 package com.cl.register.server;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -36,7 +36,7 @@ public class ServiceRegistry {
      * 外层MAP：key 为服务名称，value 为这个服务的所有服务实例
      * 内层MAP：key 为服务实例ID，value 为服务实例信息
      */
-    private Map<String, Map<String, ServiceInstance>> registry = new HashMap<>();
+    private Map<String, Map<String, ServiceInstance>> registry = new ConcurrentHashMap<>();
 
     /**
      * 最近变更的服务实例的队列
@@ -167,7 +167,7 @@ public class ServiceRegistry {
 
             // 不存在则初始化
             if (serviceInstanceMap == null) {
-                serviceInstanceMap = new HashMap<>();
+                serviceInstanceMap = new ConcurrentHashMap<>();
                 registry.put(serviceInstance.getServiceName(), serviceInstanceMap);
             }
 
