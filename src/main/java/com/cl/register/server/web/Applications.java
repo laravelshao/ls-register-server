@@ -1,4 +1,6 @@
-package com.cl.register.server;
+package com.cl.register.server.web;
+
+import com.cl.register.server.core.ServiceInstance;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.cl.register.server;
+package com.cl.register.server.core;
 
 /**
  * 自我保护机制

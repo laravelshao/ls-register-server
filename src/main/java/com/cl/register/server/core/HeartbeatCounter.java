@@ -1,7 +1,6 @@
-package com.cl.register.server;
+package com.cl.register.server.core;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAdder;
 
 /**
  * 心跳测试计数器

@@ -1,4 +1,4 @@
-package com.cl.register.server.dto;
+package com.cl.register.server.web;
 
 /**
  * 心跳响应对象

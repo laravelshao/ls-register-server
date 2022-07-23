@@ -1,7 +1,9 @@
 package com.cl.register.server;
 
-import com.cl.register.server.dto.HeartbeatRequest;
-import com.cl.register.server.dto.RegisterRequest;
+import com.cl.register.server.core.ServiceAliveMonitor;
+import com.cl.register.server.web.HeartbeatRequest;
+import com.cl.register.server.web.RegisterRequest;
+import com.cl.register.server.web.RegisterServerController;
 
 import java.util.UUID;
 

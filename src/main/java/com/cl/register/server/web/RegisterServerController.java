@@ -1,10 +1,14 @@
-package com.cl.register.server;
+package com.cl.register.server.web;
 
-import com.cl.register.server.ServiceRegistryCache.CacheKey;
-import com.cl.register.server.dto.HeartbeatRequest;
-import com.cl.register.server.dto.HeartbeatResponse;
-import com.cl.register.server.dto.RegisterRequest;
-import com.cl.register.server.dto.RegisterResponse;
+import com.cl.register.server.cluster.PeersReplicateBatch;
+import com.cl.register.server.cluster.PeersReplicator;
+import com.cl.register.server.core.DeltaRegistry;
+import com.cl.register.server.core.HeartbeatCounter;
+import com.cl.register.server.core.SelfProtectionPolicy;
+import com.cl.register.server.core.ServiceInstance;
+import com.cl.register.server.core.ServiceRegistry;
+import com.cl.register.server.core.ServiceRegistryCache;
+import com.cl.register.server.core.ServiceRegistryCache.CacheKey;
 
 /**
  * 负责接收客户端的服务注册及心跳上报
@@ -23,6 +27,11 @@ public class RegisterServerController {
      * 服务注册表缓存
      */
     private ServiceRegistryCache registryCache = ServiceRegistryCache.getInstance();
+
+    /**
+     * 集群同步组件
+     */
+    private PeersReplicator peersReplicator = PeersReplicator.getInstance();
 
     /**
      * 服务注册
@@ -56,6 +65,9 @@ public class RegisterServerController {
             // 过期掉注册表缓存
             registryCache.invalidate();
 
+            // 进行集群同步
+            peersReplicator.replicateRegister(registerRequest);
+
             regResponse.setStatus(RegisterResponse.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,10 +80,10 @@ public class RegisterServerController {
     /**
      * 服务下线
      */
-    public void cancel(String serviceName, String serviceInstanceId) {
+    public void cancel(CancelRequest cancelRequest) {
 
         // 从服务注册中摘除实例
-        registry.remove(serviceName, serviceInstanceId);
+        registry.remove(cancelRequest.getServiceName(), cancelRequest.getServiceInstanceId());
 
         // 更新自我保护阈值
         synchronized (SelfProtectionPolicy.class) {
@@ -82,6 +94,9 @@ public class RegisterServerController {
 
         // 过期掉注册表缓存
         registryCache.invalidate();
+
+        // 进行集群同步
+        peersReplicator.replicateCancel(cancelRequest);
     }
 
     /**
@@ -106,6 +121,9 @@ public class RegisterServerController {
             HeartbeatCounter heartbeatMessuredRate = HeartbeatCounter.getInstance();
             heartbeatMessuredRate.increment();
 
+            // 进行集群同步
+            peersReplicator.replicateHeartbeat(heartbeatRequest);
+
             heartbeatResponse.setStatus(HeartbeatResponse.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,6 +131,25 @@ public class RegisterServerController {
         }
 
         return heartbeatResponse;
+    }
+
+    /**
+     * 同步batch数据
+     *
+     * @param batch
+     */
+    public void replicateBatch(PeersReplicateBatch batch) {
+
+        for (AbstractRequest request : batch.getRequests()) {
+
+            if (request.getType().equals(AbstractRequest.REGISTER_REQUEST)) {
+                register((RegisterRequest) request);
+            } else if (request.getType().equals(AbstractRequest.CANCEL_REQUEST)) {
+                cancel((CancelRequest) request);
+            } else if (request.getType().equals(AbstractRequest.HEARTBEAT_REQUEST)) {
+                heartbeat((HeartbeatRequest) request);
+            }
+        }
     }
 
     /**

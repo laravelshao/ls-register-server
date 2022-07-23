@@ -1,6 +1,6 @@
-package com.cl.register.server;
+package com.cl.register.server.core;
 
-import com.cl.register.server.ServiceRegistry.RecentlyChangedServiceInstance;
+import com.cl.register.server.core.ServiceRegistry.RecentlyChangedServiceInstance;
 
 import java.util.Queue;
 

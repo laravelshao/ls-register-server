@@ -1,4 +1,4 @@
-package com.cl.register.server;
+package com.cl.register.server.core;
 
 import java.util.Map;
 import java.util.Queue;
