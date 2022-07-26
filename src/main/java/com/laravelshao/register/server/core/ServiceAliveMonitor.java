@@ -1,4 +1,4 @@
-package com.cl.register.server.core;
+package com.laravelshao.register.server.core;
 
 import java.util.ArrayList;
 import java.util.List;

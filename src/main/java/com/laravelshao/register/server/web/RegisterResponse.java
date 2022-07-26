@@ -1,4 +1,4 @@
-package com.cl.register.server.web;
+package com.laravelshao.register.server.web;
 
 /**
  * 注册响应对象

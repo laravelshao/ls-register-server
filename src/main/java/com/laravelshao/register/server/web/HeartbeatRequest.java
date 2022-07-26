@@ -1,4 +1,4 @@
-package com.cl.register.server.web;
+package com.laravelshao.register.server.web;
 
 /**
  * 心跳请求对象

@@ -1,6 +1,6 @@
-package com.cl.register.server.cluster;
+package com.laravelshao.register.server.cluster;
 
-import com.cl.register.server.web.AbstractRequest;
+import com.laravelshao.register.server.web.AbstractRequest;
 
 import java.util.ArrayList;
 import java.util.List;

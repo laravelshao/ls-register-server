@@ -1,2 +1,2 @@
-# cl-register-server
-cl 注册中心服务端
+# ls-register-server
+ls 注册中心服务端

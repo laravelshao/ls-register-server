@@ -1,6 +1,6 @@
-package com.cl.register.server.core;
+package com.laravelshao.register.server.core;
 
-import com.cl.register.server.core.ServiceRegistry.RecentlyChangedServiceInstance;
+import com.laravelshao.register.server.core.ServiceRegistry.RecentlyChangedServiceInstance;
 
 import java.util.Queue;
 

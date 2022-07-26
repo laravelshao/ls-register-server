@@ -1,9 +1,9 @@
-package com.cl.register.server.cluster;
+package com.laravelshao.register.server.cluster;
 
-import com.cl.register.server.web.AbstractRequest;
-import com.cl.register.server.web.CancelRequest;
-import com.cl.register.server.web.HeartbeatRequest;
-import com.cl.register.server.web.RegisterRequest;
+import com.laravelshao.register.server.web.AbstractRequest;
+import com.laravelshao.register.server.web.CancelRequest;
+import com.laravelshao.register.server.web.HeartbeatRequest;
+import com.laravelshao.register.server.web.RegisterRequest;
 
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;

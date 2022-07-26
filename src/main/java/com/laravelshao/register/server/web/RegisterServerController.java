@@ -1,14 +1,14 @@
-package com.cl.register.server.web;
+package com.laravelshao.register.server.web;
 
-import com.cl.register.server.cluster.PeersReplicateBatch;
-import com.cl.register.server.cluster.PeersReplicator;
-import com.cl.register.server.core.DeltaRegistry;
-import com.cl.register.server.core.HeartbeatCounter;
-import com.cl.register.server.core.SelfProtectionPolicy;
-import com.cl.register.server.core.ServiceInstance;
-import com.cl.register.server.core.ServiceRegistry;
-import com.cl.register.server.core.ServiceRegistryCache;
-import com.cl.register.server.core.ServiceRegistryCache.CacheKey;
+import com.laravelshao.register.server.cluster.PeersReplicateBatch;
+import com.laravelshao.register.server.cluster.PeersReplicator;
+import com.laravelshao.register.server.core.DeltaRegistry;
+import com.laravelshao.register.server.core.HeartbeatCounter;
+import com.laravelshao.register.server.core.SelfProtectionPolicy;
+import com.laravelshao.register.server.core.ServiceInstance;
+import com.laravelshao.register.server.core.ServiceRegistry;
+import com.laravelshao.register.server.core.ServiceRegistryCache;
+import com.laravelshao.register.server.core.ServiceRegistryCache.CacheKey;
 
 /**
  * 负责接收客户端的服务注册及心跳上报

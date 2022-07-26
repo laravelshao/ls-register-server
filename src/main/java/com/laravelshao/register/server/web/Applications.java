@@ -1,6 +1,6 @@
-package com.cl.register.server.web;
+package com.laravelshao.register.server.web;
 
-import com.cl.register.server.core.ServiceInstance;
+import com.laravelshao.register.server.core.ServiceInstance;
 
 import java.util.HashMap;
 import java.util.Map;

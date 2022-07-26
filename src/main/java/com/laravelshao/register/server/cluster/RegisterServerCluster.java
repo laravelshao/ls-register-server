@@ -1,4 +1,4 @@
-package com.cl.register.server.cluster;
+package com.laravelshao.register.server.cluster;
 
 import java.util.ArrayList;
 import java.util.List;
